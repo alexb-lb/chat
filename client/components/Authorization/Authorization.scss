@@ -1,0 +1,24 @@
+.page-authorization {
+  display: grid;
+}
+
+.auth-container {
+  max-width: 60rem;
+  padding: $gap-l-size $gap-m-size;
+  border: 1px solid $form-container-border-color;
+  background-color: $white;
+  border-radius: 0;
+}
+
+.auth-container h1 {
+  text-align: center;
+}
+
+@media (min-width: $desktop-breakpoint) {
+  .auth-container{
+    min-width: 60rem;
+    margin: auto;
+    border-radius: $border-radius;
+    padding: $gap-l-size $gap-xxl-size;
+  }
+}
