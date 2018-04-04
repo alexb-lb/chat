@@ -6,41 +6,38 @@ const moment = require('moment');
 const User = require('../models/user');
 const config = require('../../config');
 
-const genToken = (user) => {
-  let expires = moment().utc().add({days: 7}).unix();
-  let token = jwt.sign({
-    exp: expires,
-    name: user.name
-  }, config.jwtSecret);
-
-  return {
-    token: "JWT " + token,
-    expires: moment.unix(expires).format()
-  };
-};
-
 /**
- * Set cookie for 1 week
- * @param res
- * @param user
+ * Set cookie with user info and token for 1 week
+ * @param res - set user cookie
+ * @param user - user object
+ * @returns res with user cookie, which includes generated token
  */
 const setResponseCookie = (res, user) => {
   const userCookie = {
-    userId: user._id,
-    userName: user.name,
+    _id: user._id,
+    name: user.name,
     token: genToken(user)
   };
-  res.cookie('user', JSON.stringify(userCookie), {maxAge: 604800000});
+  res.cookie('user', userCookie, {maxAge: 604800000});
   return userCookie;
+};
+
+/**
+ * Generate token from user object
+ * @param user object - get user._id and user.name, generate token with them
+ * @returns token string
+ */
+const genToken = ({_id, name}) => {
+  return jwt.sign({_id, name}, config.jwtSecret);
 };
 
 /**
  * Validate the register form
  * @param {object} payload - the HTTP body message
  * @returns {object} The result of validation. Object contains:
- *  boolean validation result,
- *  error message
- *  client side element name where error occurs
+ *   boolean validation result,
+ *   error message
+ *   client side element name where error occurs
  */
 const validateRegisterForm = (payload) => {
   const validationResult = {
@@ -73,6 +70,14 @@ const validateRegisterForm = (payload) => {
   return validationResult;
 };
 
+/**
+ * Validate the login form
+ * @param {object} payload - the HTTP body message
+ * @returns {object} The result of validation. Object contains:
+ *   boolean validation result,
+ *   error message
+ *   client side element name where error occurs
+ */
 const validateLoginForm = (payload) => {
   const validationResult = {
     success: true,
@@ -98,34 +103,60 @@ const validateLoginForm = (payload) => {
 };
 
 module.exports = {
+  /**
+   * Validate user token user first request to server
+   * @param res - get user cookie from response object
+   *   check if cookie.user object exists
+   *   check if cookie.user.token object exists
+   *   check if cookie.user.token valid
+   *   update res.cookie.user time to expire if all is ok
+   *
+   * @param req - pass decoded user info from token
+   *   into req.params.user like {_id, name}
+   *
+   * @returns
+   *   next
+   *   updated cookie time
+   */
   authenticate: (req, res, next) => {
-    setResponseCookie(res, false);
+    const userCookie = req.cookies.user;
 
-    return passport.authenticate("loginByToken", {session: false, failWithError: true},
-      (err, user, info) => {
-        if (user) {
-          setResponseCookie(res, user);
-        }
-        return next();
-        // if (err) return next(err);
-        //
-        // if (!user) {
-        //   if (info.name === "TokenExpiredError") {
-        //     return next({message: "Token has expired"});
-        //   } else {
-        //     return next({message: info.message});
-        //   }
-        // }
+    // check if cookie exists and if has inside it token param or delete cookie "user"
+    if (!userCookie || !userCookie.token) {
+      res.clearCookie('user');
+      return next();
+    }
 
-      })(req, res, next);
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(userCookie.token, config.jwtSecret);
+    } catch (e){
+      console.log(`Token ${userCookie.token} broken: ${e}`);
+      res.clearCookie('user');
+      return next();
+    }
+
+    // pass user info to req
+    req.params.user = decodedToken;
+    // re-update cookie time if all is ok
+    setResponseCookie(res, decodedToken);
+
+    return next();
   },
 
   /**
-   * Login authorization
-   * First checks token with jwt passport strategy
-   * if token not found, continue to check if req.body contains email and password
+   * LOGIN method
+   * @param req
+   *   get form filed from req.body like {email, password}
+   *   validate form fields
+   *   check if user exists in DB
+   *   check if user password equal to password from form field
+   * @param res
+   *   set cookie "user" with generated token if all is ok,
+   *   like {_id, name, token}
+   * @returns res with status 200 ot 404
    */
-  login: async (req, res, next) => {
+  login: async (req, res) => {
     try {
       const validationResult = validateLoginForm(req.body);
       if (!validationResult.success) throw validationResult;
@@ -143,8 +174,18 @@ module.exports = {
     }
   },
 
-  // REGISTER
-  register(req, res, next){
+  /**
+   * REGISTER method
+   * @param req
+   *   get form filed from req.body like {email, password, name}
+   *   validate form fields
+   *   save user into DB
+   * @param res
+   *   set cookie "user" with generated token if all is ok,
+   *   like {_id, name, token}
+   * @returns res with status 200 ot 404
+   */
+  register(req, res){
     const validationResult = validateRegisterForm(req.body);
     if (!validationResult.success) {
       return res.status(400).json(validationResult);
@@ -172,13 +213,5 @@ module.exports = {
           message: 'Could not process the form.'
         });
       });
-  },
-
-  // LOGOUT
-  logout(req, res){
-    // res = setCookie(res, false);
-    res.cookie('user', false, {maxAge: 604800000});
-    return res.status(200);
-
-  },
+  }
 };

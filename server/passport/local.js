@@ -5,16 +5,6 @@ const JwtStrategy = require('passport-jwt').Strategy,
 const config = require('../../config');
 
 module.exports = {
-  /**
-   * Login via JWT strategy
-   * @param {object}
-   *   string - JWT token from HTTP body message
-   *   string - secret key from config file
-   * @return {object}
-   *   boolean - success\error
-   *   object - user from DB
-   *   object with error message
-   */
 
   loginByToken() {
     const params = {
@@ -24,14 +14,14 @@ module.exports = {
     };
 
     return new JwtStrategy(params, (req, payload, done) => {
-      User.findOne({email: payload.email}, (err, user) => {
+      User.findOne({_id: payload.userId}, (err, user) => {
         if (err) return done(err);
 
         if (user === null) {
           return done(null, false, { message: "The user in the token was not found" });
         }
 
-        return done(null, {_id: user._id, email: user.email});
+        return done(null, {_id: user._id, name: user.name});
       });
     });
   }

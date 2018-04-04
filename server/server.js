@@ -3,10 +3,7 @@ const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-
-// passport
-const passport = require('passport')
-const passportLocal = require('./passport/local');
+const cookieParser = require('cookie-parser');
 
 // config files
 const config = require('../config');
@@ -29,16 +26,13 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
+app.use(cookieParser());
+
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
 
-// passport initialize
-passport.use('loginByToken', passportLocal.loginByToken());
-app.use(passport.initialize());
-
 app.post('/login', authController.login);
 app.post('/register', authController.register);
-app.post('/logout', authController.logout);
 
 /**
  * Send index.html file
