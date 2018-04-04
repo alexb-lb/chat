@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
-const passport = require('passport');
 const moment = require('moment');
 
 const User = require('../models/user');
@@ -193,7 +192,7 @@ module.exports = {
 
     const user = new User(req.body);
     user.save()
-      .then(() => {
+      .then(() =>{
         const userData = setResponseCookie(res, user);
         res.status(200).json({success: true, user: userData});
       })
