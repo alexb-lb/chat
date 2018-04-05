@@ -1,3 +1,4 @@
+const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const moment = require('moment');
@@ -6,19 +7,17 @@ const User = require('../models/user');
 const config = require('../../config');
 
 /**
- * Set cookie with user info and token for 1 week
- * @param res - set user cookie
+ * @type {number}  - user cookie time = 1 week
+ */
+const userCookieExpired = 604800000;
+
+/**
+ * Set user info for response to client
  * @param user - user object
  * @returns res with user cookie, which includes generated token
  */
-const setResponseCookie = (res, user) => {
-  const userCookie = {
-    _id: user._id,
-    name: user.name,
-    token: genToken(user)
-  };
-  res.cookie('user', userCookie, {maxAge: 604800000});
-  return userCookie;
+const setUserInfo = ({_id, name}) => {
+  return {_id, name};
 };
 
 /**
@@ -27,7 +26,8 @@ const setResponseCookie = (res, user) => {
  * @returns token string
  */
 const genToken = ({_id, name}) => {
-  return jwt.sign({_id, name}, config.jwtSecret);
+  const exp = moment().utc().subtract({days: 7}).unix();
+  return jwt.sign({_id, name, exp}, config.jwtSecret);
 };
 
 /**
@@ -102,45 +102,33 @@ const validateLoginForm = (payload) => {
 };
 
 module.exports = {
+
   /**
    * Validate user token user first request to server
-   * @param res - get user cookie from response object
-   *   check if cookie.user object exists
-   *   check if cookie.user.token object exists
-   *   check if cookie.user.token valid
-   *   update res.cookie.user time to expire if all is ok
-   *
-   * @param req - pass decoded user info from token
-   *   into req.params.user like {_id, name}
+   * @param res - get user Authorization bearer token from response object
+   *   check if token exists
+   *   check if token valid
+   *   check if token time not expired
    *
    * @returns
-   *   next
-   *   updated cookie time
+   *   success - boolean
+   *   message - server message
+   *   user - user info
+   *   {success: true, message: "server message", user: {_id, name}}
    */
   authenticate: (req, res, next) => {
-    const userCookie = req.cookies.user;
-
-    // check if cookie exists and if has inside it token param or delete cookie "user"
-    if (!userCookie || !userCookie.token) {
-      res.clearCookie('user');
-      return next();
-    }
-
-    let decodedToken;
-    try {
-      decodedToken = jwt.verify(userCookie.token, config.jwtSecret);
-    } catch (e){
-      console.log(`Token ${userCookie.token} broken: ${e}`);
-      res.clearCookie('user');
-      return next();
-    }
-
-    // pass user info to req
-    req.params.user = decodedToken;
-    // re-update cookie time if all is ok
-    setResponseCookie(res, decodedToken);
-
-    return next();
+    return passport.authenticate('jwt', {session: false, failWithError: true}, (payload, info) => {
+        if (!payload) {
+          if (info.name === "TokenExpiredError") {
+            return res.status(401).json({success: false, message: 'Token has expired'});
+          } else {
+            console.log('Token damaged');
+            return res.status(401).json({success: false, message: 'Token damaged'});
+          }
+        }
+        return res.status(200).json({success: true, message: 'OK', user: setUserInfo(user)});
+      }
+    )(req, res, next);
   },
 
   /**
@@ -166,8 +154,7 @@ module.exports = {
       let success = await user.comparePassword(req.body.password);
       if (success === false) throw {success: false, message: 'Incorrect password'};
 
-      const userData = setResponseCookie(res, user);
-      res.status(200).json({success: true, user: userData});
+      res.status(200).json({success: true, user: setUserInfo(user)});
     } catch (err) {
       res.status(404).json(err);
     }
@@ -192,10 +179,7 @@ module.exports = {
 
     const user = new User(req.body);
     user.save()
-      .then(() =>{
-        const userData = setResponseCookie(res, user);
-        res.status(200).json({success: true, user: userData});
-      })
+      .then(() => res.status(200).json({success: true, user: setUserInfo(user)}))
       .catch((err) => {
         // the 11000 Mongo code is for a duplication email error
         if (err.code === 11000) {

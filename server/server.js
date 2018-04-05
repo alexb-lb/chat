@@ -4,6 +4,10 @@ const path = require('path');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const passport = require('passport');
+
+// passport strategies
+const passportStrategies = require('./middleware/passportStrategies');
 
 // config files
 const config = require('../config');
@@ -28,11 +32,17 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 app.use(cookieParser());
 
+// passport init
+app.use(passport.initialize());
+passport.use("jwt", passportStrategies.jwtStrategy());
+
+
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
 
 app.post('/login', authController.login);
 app.post('/register', authController.register);
+app.post('/auth', authController.authenticate);
 
 /**
  * Send index.html file
@@ -40,7 +50,7 @@ app.post('/register', authController.register);
  * if user hasn't token (new user for example), send cookie "user = false"
  * or send user info in cookie as "user = json'ed user params"
  */
-app.get('*', authController.authenticate, (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(publicPath, 'app.html'));
 });
 
