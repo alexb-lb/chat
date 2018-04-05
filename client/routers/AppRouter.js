@@ -2,17 +2,27 @@ import React from 'react';
 import {Router, Route, Switch, Link, NavLink} from 'react-router-dom';
 import createHistory from 'history/createBrowserHistory';
 
+// routers
+import PrivateRoute from './PrivateRoute';
+import PublicRoute from './PublicRoute';
+
+// compontents
+import Dating from '../components/Dating/Dating';
+import Authorization from '../components/Authorization/Authorization';
+import Login from '../components/Authorization/LocalAuthorization/Login/Login';
+import Register from '../components/Authorization/LocalAuthorization/Register/Register';
+
+// history
 export const history = createHistory();
 
+// routing
 const AppRouter = () => (
   <Router history={history}>
     <div>
       <Switch>
-        {/*<PublicRoute path="/" component={LoginPage} exact={true}/>*/}
-        {/*<PrivateRoute path="/dashboard" component={ExpenseDashboardPage} />*/}
-        {/*<PrivateRoute path="/create" component={AddExpensePage}/>*/}
-        {/*<PrivateRoute path="/edit/:id" component={EditExpensePage}/>*/}
-        {/*<PublicRoute component={NotFoundPage}/>*/}
+        <PrivateRoute path="/" component={Dating} exact={true}/>
+        <PublicRoute path="/login"  component={Authorization} subComponent="login"/>
+        <PublicRoute path="/register" component={Authorization} subComponent="register"/>
       </Switch>
     </div>
   </Router>

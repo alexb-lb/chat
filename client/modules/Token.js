@@ -1,11 +1,13 @@
-class Auth {
+import axios from "axios";
+
+class Token {
 
   /**
    * Authenticate a user. Save a token string in Local Storage
    *
    * @param {string} token
    */
-  static authenticateUser(token) {
+  static set(token) {
     localStorage.setItem('token', token);
   }
 
@@ -22,7 +24,7 @@ class Auth {
    * Deauthenticate a user. Remove a token from Local Storage.
    *
    */
-  static deauthenticateUser() {
+  static remove() {
     localStorage.removeItem('token');
   }
 
@@ -36,6 +38,12 @@ class Auth {
     return localStorage.getItem('token');
   }
 
+
+  /**
+   * Request to server to check the validity of the token
+   *
+   * @returns {object}
+   */
 }
 
-export default Auth;
+export default Token;

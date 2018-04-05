@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import {connect} from 'react-redux';
 
 import Logo from "../../components/Logo/Logo";
 import Register from "./LocalAuthorization/Register/Register";
@@ -21,7 +22,6 @@ class Authorization extends React.Component {
         name: '',
         password: ''
       },
-
       formValidation: this.defaultFormValidationState
     };
   }
@@ -91,7 +91,7 @@ class Authorization extends React.Component {
 
         <div className="auth-container">
           {
-            this.props.newUser ?
+            this.props.match.path === '/register' ?
               <Register
                 onChange={this.changeUser}
                 onSubmit={this.processRegisterForm}
@@ -112,4 +112,8 @@ class Authorization extends React.Component {
   }
 }
 
-export default Authorization;
+const mapDispatchToProps = (dispatch) => ({
+  // startAddExpense: (expense) => dispatch(startAddExpense(expense))
+});
+
+export default connect(undefined, mapDispatchToProps)(Authorization);

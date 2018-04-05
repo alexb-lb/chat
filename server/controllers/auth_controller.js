@@ -17,7 +17,7 @@ const userCookieExpired = 604800000;
  * @returns res with user cookie, which includes generated token
  */
 const setUserInfo = ({_id, name}) => {
-  return {_id, name};
+  return {_id, name, token: genToken({_id, name})};
 };
 
 /**
@@ -26,7 +26,8 @@ const setUserInfo = ({_id, name}) => {
  * @returns token string
  */
 const genToken = ({_id, name}) => {
-  const exp = moment().utc().subtract({days: 7}).unix();
+  // TODO: change expiration time when chat become popular
+  const exp = moment().utc().subtract({days: 365}).unix();
   return jwt.sign({_id, name, exp}, config.jwtSecret);
 };
 
@@ -52,7 +53,7 @@ const validateRegisterForm = (payload) => {
     return validationResult;
   }
 
-  if (!payload || typeof payload.password !== 'string' || payload.password.trim().length < 8) {
+  if (!payload || typeof payload.password !== 'string' || payload.password.trim().length < 6) {
     validationResult.success = false;
     validationResult.message = 'Password must have at least 8 characters.';
     validationResult.errorInElement = 'password';
@@ -91,7 +92,7 @@ const validateLoginForm = (payload) => {
     return validationResult;
   }
 
-  if (!payload || typeof payload.password !== 'string' || payload.password.trim().length < 8) {
+  if (!payload || typeof payload.password !== 'string' || payload.password.trim().length < 6) {
     validationResult.success = false;
     validationResult.message = 'Password must have at least 8 characters.';
     validationResult.errorInElement = 'password';
