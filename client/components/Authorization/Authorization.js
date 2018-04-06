@@ -2,6 +2,9 @@ import React from "react";
 import axios from "axios";
 import {connect} from 'react-redux';
 
+import {startLogin} from '../../actions/auth';
+import {startRegister} from '../../actions/auth';
+
 import Logo from "../../components/Logo/Logo";
 import Register from "./LocalAuthorization/Register/Register";
 import Login from "./LocalAuthorization/Login/Login";
@@ -10,19 +13,12 @@ class Authorization extends React.Component {
   constructor(props) {
     super(props);
 
-    this.defaultFormValidationState = {
-      success: true,
-      message: '',
-      errorInElement: false
-    };
-
     this.state = {
       user: {
         email: '',
         name: '',
         password: ''
-      },
-      formValidation: this.defaultFormValidationState
+      }
     };
   }
 
@@ -43,20 +39,7 @@ class Authorization extends React.Component {
     const password = encodeURIComponent(this.state.user.password);
     const formData = `name=${name}&email=${email}&password=${password}`;
 
-    // create an AJAX request
-    axios({
-      method: 'post',
-      url: '/register',
-      data: formData
-    })
-      .then((response) => this.setState({formValidation: this.defaultFormValidationState}))
-      .catch((err) => {
-        if (!err.response.data.success) {
-          return this.setState({
-            formValidation: err.response.data
-          });
-        }
-      });
+    this.props.startRegister(formData);
   };
 
   processLoginForm = (event) => {
@@ -67,21 +50,7 @@ class Authorization extends React.Component {
     const password = encodeURIComponent(this.state.user.password);
     const formData = `email=${email}&password=${password}`;
 
-    // create an AJAX request
-    axios({
-      method: 'post',
-      url: '/login',
-      data: formData,
-      headers: {"Authorization": localStorage.getItem('token')},
-    })
-      .then((response) => this.setState({formValidation: this.defaultFormValidationState}))
-      .catch((err) => {
-        if (!err.response.data.success) {
-          return this.setState({
-            formValidation: err.response.data
-          });
-        }
-      });
+    this.props.startLogin(formData);
   };
 
   render() {
@@ -96,14 +65,14 @@ class Authorization extends React.Component {
                 onChange={this.changeUser}
                 onSubmit={this.processRegisterForm}
                 user={this.state.user}
-                formValidation={this.state.formValidation}
+                formValidation={this.props.formValidation}
               />
               :
               <Login
                 onChange={this.changeUser}
                 onSubmit={this.processLoginForm}
                 user={this.state.user}
-                formValidation={this.state.formValidation}
+                formValidation={this.props.formValidation}
               />
           }
         </div>
@@ -112,8 +81,11 @@ class Authorization extends React.Component {
   }
 }
 
+const mapStateToProps = (state) => ({formValidation: state.formValidation});
+
 const mapDispatchToProps = (dispatch) => ({
-  // startAddExpense: (expense) => dispatch(startAddExpense(expense))
+  startLogin: formData => dispatch(startLogin(formData)),
+  startRegister: formData => dispatch(startRegister(formData))
 });
 
-export default connect(undefined, mapDispatchToProps)(Authorization);
+export default connect(mapStateToProps, mapDispatchToProps)(Authorization);

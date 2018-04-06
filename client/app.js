@@ -1,11 +1,10 @@
 // Libs
 import React from 'react';
-import ReactDOM from 'react-dom';
-import {Provider} from 'react-redux';
+import ReactDom from 'react-dom';
+import {Provider, connect} from 'react-redux';
 
 // App root and imported reducers inside configureStore
 import AppRouter, {history} from './routers/AppRouter'
-import configureStore from './store/configureStore';
 
 // Actions
 import {startAuthenticate} from "./actions/auth"
@@ -17,29 +16,33 @@ import './styles/styles.scss';
 // components
 import LoadingPage from './components/LoadingPage/LoadingPage'
 
+import configureStore from './store/configureStore';
+
 // Combine imported reducers
 const store = configureStore();
 
-// enter point
-const jsx = (
-  <Provider store={store}>
-    <AppRouter/>
-  </Provider>
-);
+class Main extends React.Component {
 
-// avoid rendering app every time after user log in
-const renderApp = () => {
-  ReactDOM.render(jsx, document.getElementById('app'));
-};
+  constructor(props){
+    super(props);
+  }
 
-// waits until database sends info about authentication
-ReactDOM.render(<LoadingPage/>, document.getElementById('app'));
+  componentDidMount() {
+    // check if user is logged in on refresh
+    store.dispatch(startAuthenticate());
+  }
 
-// wait until server sends back response with user object, then launch app
-const unsubscribe = store.subscribe(() => {
-  unsubscribe();
-  renderApp();
-});
+  render() {
+    return (
+      store.getState().auth.user ? (
+        <LoadingPage/>
+      ) : (
+        <Provider store={store}>
+          <AppRouter/>
+        </Provider>
+      )
+    );
+  }
+}
 
-// START check if user has token and auth him or show register/login page
-store.dispatch(startAuthenticate());
+ReactDom.render(<Main/>, document.getElementById('app'));

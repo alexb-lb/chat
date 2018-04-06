@@ -1,19 +1,53 @@
 import axios from 'axios';
 import Token from '../modules/Token';
-
+import {showFormValidationError, hideFormValidationError} from '../actions/formValidation';
 
 /**
- * LOGIN action
- * @param uid
+ * LOGIN
+ * @param user - object
+ * @returns {{type: string, user: object}}
  */
 export const login = (user) => {
   Token.set(user.token);
   return {type: 'LOGIN', user}
 };
 
-export const startLogin = () => {
-  return () => {
-    return 'POST to /login';
+export const startLogin = (formData = '') => {
+  return (dispatch, getState) => {
+    const params = {
+      method: 'post',
+      url: '/login',
+      data: formData
+    };
+
+    return axios(params)
+      .then(({data}) => {
+        dispatch(login(data.user));
+        dispatch(hideFormValidationError());
+      })
+      .catch((err) => {
+        dispatch(showFormValidationError(err.response.data));
+      });
+  };
+};
+
+
+export const startRegister = (formData = '') => {
+  return (dispatch, getState) => {
+    const params = {
+      method: 'post',
+      url: '/register',
+      data: formData
+    };
+
+    return axios(params)
+      .then(({data}) => {
+        dispatch(login(data.user));
+        dispatch(hideFormValidationError());
+      })
+      .catch((err) => {
+        dispatch(showFormValidationError(err.response.data));
+      });
   };
 };
 
@@ -48,16 +82,16 @@ export const startAuthenticate = () => {
     };
 
     return axios(reqParams)
-      .then(result => {
-        console.log('unpursed result ' + result);
-        result = JSON.parse(result);
-        console.log('parsed result ' + result);
-        if (!result.success) return dispatch(logout());
-        return dispatch(login(result.user))
+      .then(({data}) => {
+        if (!data.success) {
+          dispatch(logout());
+        } else {
+          dispatch(login(data.user));
+        }
       })
       .catch((err) => {
         console.log(err);
-        return dispatch(logout());
+        dispatch(logout());
       });
   }
 };

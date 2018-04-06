@@ -27,8 +27,8 @@ const setUserInfo = ({_id, name}) => {
  */
 const genToken = ({_id, name}) => {
   // TODO: change expiration time when chat become popular
-  const exp = moment().utc().subtract({days: 365}).unix();
-  return jwt.sign({_id, name, exp}, config.jwtSecret);
+  const exp = moment().utc().add({days: 365}).unix();
+  return 'Bearer ' + jwt.sign({_id, name, exp}, config.jwtSecret);
 };
 
 /**
@@ -118,6 +118,8 @@ module.exports = {
    *   {success: true, message: "server message", user: {_id, name}}
    */
   authenticate: (req, res, next) => {
+    const headerAuth = req.get('Authorization');
+
     return passport.authenticate('jwt', {session: false, failWithError: true}, (payload, info) => {
         if (!payload) {
           if (info.name === "TokenExpiredError") {
@@ -127,7 +129,7 @@ module.exports = {
             return res.status(401).json({success: false, message: 'Token damaged'});
           }
         }
-        return res.status(200).json({success: true, message: 'OK', user: setUserInfo(user)});
+        return res.status(200).json({success: true, message: 'OK', user: setUserInfo(payload)});
       }
     )(req, res, next);
   },
@@ -150,10 +152,10 @@ module.exports = {
       if (!validationResult.success) throw validationResult;
 
       let user = await User.findOne({email: req.body.email});
-      if (user === null) throw {success: false, message: 'User not found'};
+      if (user === null) throw {success: false, message: 'User not found', errorInElement: false};
 
       let success = await user.comparePassword(req.body.password);
-      if (success === false) throw {success: false, message: 'Incorrect password'};
+      if (success === false) throw {success: false, message: 'Incorrect password', errorInElement: 'password'};
 
       res.status(200).json({success: true, user: setUserInfo(user)});
     } catch (err) {
@@ -194,7 +196,8 @@ module.exports = {
 
         return res.status(400).json({
           success: false,
-          message: 'Could not process the form.'
+          message: 'Could not process the form.',
+          errorInElement: false
         });
       });
   }
