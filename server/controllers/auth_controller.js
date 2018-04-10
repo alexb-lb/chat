@@ -7,11 +7,6 @@ const User = require('../models/user');
 const config = require('../../config');
 
 /**
- * @type {number}  - user cookie time = 1 week
- */
-const userCookieExpired = 604800000;
-
-/**
  * Set user info for response to client
  * @param user - user object
  * @returns res with user cookie, which includes generated token
@@ -27,7 +22,7 @@ const setUserInfo = ({_id, name}) => {
  */
 const genToken = ({_id, name}) => {
   // TODO: change expiration time when chat become popular
-  const exp = moment().utc().add({days: 365}).unix();
+  const exp = moment().utc().add({days: 2}).unix();
   return 'Bearer ' + jwt.sign({_id, name, exp}, config.jwtSecret);
 };
 
