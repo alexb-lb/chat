@@ -31,7 +31,6 @@ export const startLogin = (formData = '') => {
   };
 };
 
-
 export const startRegister = (formData = '') => {
   return (dispatch, getState) => {
     const params = {

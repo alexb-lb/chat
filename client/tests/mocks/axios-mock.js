@@ -19,4 +19,24 @@ mock.onPost('/login').reply(reqData => {
   });
 });
 
+mock.onPost('/register').reply(reqData => {
+  return new Promise((res, rej) => {
+    if(!reqData.data){
+      return rej({response: {data: errorState}})
+    }
+
+    return res([200, authenticated])
+  });
+});
+
+mock.onPost('/auth').reply(reqData => {
+  return new Promise((res, rej) => {
+    if(reqData.headers.Authorization !== 'validToken'){
+      return rej({response: {data: {success: false, message: 'Token damaged'}}})
+    }
+
+    return res([200, {success: true, message: 'OK', user: authenticated.user}])
+  });
+});
+
 export default mock;
