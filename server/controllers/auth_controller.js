@@ -21,7 +21,6 @@ const setUserInfo = ({_id, name}) => {
  * @returns token string
  */
 const genToken = ({_id, name}) => {
-  // TODO: change expiration time when chat become popular
   const exp = moment().utc().add({days: 2}).unix();
   return 'Bearer ' + jwt.sign({_id, name, exp}, config.jwtSecret);
 };
@@ -113,8 +112,6 @@ module.exports = {
    *   {success: true, message: "server message", user: {_id, name}}
    */
   authenticate: (req, res, next) => {
-    const headerAuth = req.get('Authorization');
-
     return passport.authenticate('jwt', {session: false, failWithError: true}, (payload, info) => {
         if (!payload) {
           if (info.name === "TokenExpiredError") {

@@ -46,6 +46,7 @@ export const startRegister = (formData = '') => {
         dispatch(hideFormValidationError());
       })
       .catch((err) => {
+        console.log(err);
         dispatch(showFormValidationError(err.response.data));
       });
   };
@@ -60,9 +61,7 @@ export const logout = () => {
 };
 
 export const startLogout = () => {
-  return (dispatch) => {
-    return () => dispatch(logout())
-  }
+  return (dispatch) => dispatch(logout())
 };
 
 
