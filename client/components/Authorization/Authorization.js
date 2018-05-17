@@ -1,4 +1,5 @@
 import React from "react";
+import {Redirect} from "react-router-dom";
 import axios from "axios";
 import {connect} from 'react-redux';
 
@@ -39,7 +40,7 @@ class Authorization extends React.Component {
     const password = encodeURIComponent(this.state.user.password);
     const formData = `name=${name}&email=${email}&password=${password}`;
 
-    this.props.startRegister(formData);
+    this.props.startRegister(formData)
   };
 
   processLoginForm = (event) => {
@@ -50,10 +51,17 @@ class Authorization extends React.Component {
     const password = encodeURIComponent(this.state.user.password);
     const formData = `email=${email}&password=${password}`;
 
-    this.props.startLogin(formData);
+    this.props.startLogin(formData)
   };
 
   render() {
+    const {from} = this.props.location.state || {from: { pathname: "/" }};
+    const {redirectToReferrer} = this.props;
+
+    if (redirectToReferrer) {
+      return <Redirect to={from} />;
+    }
+
     return (
       <main className="page-authorization">
         <Logo/>
@@ -81,7 +89,10 @@ class Authorization extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => ({formValidation: state.formValidation});
+const mapStateToProps = (state) => ({
+  formValidation: state.formValidation,
+  redirectToReferrer: state.auth.redirectToReferrer
+});
 
 const mapDispatchToProps = (dispatch) => ({
   startLogin: formData => dispatch(startLogin(formData)),

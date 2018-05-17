@@ -21,6 +21,7 @@ const AppRouter = () => (
     <div>
       <Switch>
         <PrivateRoute path="/" component={Dating} exact={true}/>
+        <PrivateRoute path="/testprivate" component={Dating} exact={true}/>
         <PublicRoute path="/login"  component={Authorization} subComponent="login"/>
         <PublicRoute path="/register" component={Authorization} subComponent="register"/>
       </Switch>

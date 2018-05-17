@@ -1,14 +1,14 @@
 const authReducerDefaultState = {
-  user: false
+  user: false,
+  redirectToReferrer: false
 };
-
 
 export default (state = authReducerDefaultState, action) => {
   switch (action.type) {
     case 'LOGIN':
-      return {user: action.user};
+      return {user: action.user, redirectToReferrer: true};
     case 'LOGOUT':
-      return {user: false};
+      return {user: false, redirectToReferrer: false};
     default:
       return state;
   }

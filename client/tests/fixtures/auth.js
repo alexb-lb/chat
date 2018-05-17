@@ -1,5 +1,6 @@
 export const notAuthenticated = {
-  user: false
+  user: false,
+  redirectToReferrer: false
 };
 
 export const authenticated = {
@@ -7,5 +8,6 @@ export const authenticated = {
     _id: 'abc123',
     name: 'Name',
     token: 'JWTabc123'
-  }
+  },
+  redirectToReferrer: true
 };

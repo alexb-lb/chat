@@ -9,6 +9,9 @@ import {errorState, noErrorState} from '../fixtures/formValidation';
 import Token from '../../modules/Token';
 jest.mock('../../modules/Token');
 
+import UserRegisteredState from '../../modules/UserRegisteredState';
+jest.mock('../../modules/UserRegisteredState');
+
 import axiosMock from '../mocks/axios-mock';
 
 const createMockStore = configureMockStore([thunk]);
@@ -39,7 +42,6 @@ test('logout - should setup auth action object without user info and call Token.
 test('startLogout - should setup auth action object without user info and call Token.remove', (done) => {
   const unsubscribe = store.subscribe(function () {
     expect(store.getActions()).toEqual([{type: 'LOGOUT'}]);
-    expect(Token.remove).toHaveBeenCalledTimes(1);
     unsubscribe();
     done();
   });
@@ -54,7 +56,6 @@ test('startLogin with valid form data - should setup auth action object from log
   return store.dispatch(authActions.startLogin(validFormData)).then(() => {
     expect(store.getActions()).toContainEqual({type: 'LOGIN', user: authenticated.user});
     expect(store.getActions()).toContainEqual({type: 'HIDE_FORM_VALIDATION_ERROR'});
-    expect(Token.set).toHaveBeenCalledTimes(1);
   })
 });
 
@@ -75,7 +76,7 @@ test('startRegister with valid form data - should setup auth action object from 
   return store.dispatch(authActions.startRegister(validFormData)).then(() => {
     expect(store.getActions()).toContainEqual({type: 'LOGIN', user: authenticated.user});
     expect(store.getActions()).toContainEqual({type: 'HIDE_FORM_VALIDATION_ERROR'});
-    expect(Token.set).toHaveBeenCalledTimes(1);
+    expect(UserRegisteredState.setUserRegistered).toHaveBeenCalledTimes(1);
   })
 });
 
@@ -93,23 +94,25 @@ test('startRegister with error form data - should setup auth action object from 
 test('startAuthenticate if no token - should setup auth action object without user info and call Token.remove', (done) => {
   Token.getToken = jest.fn(() => false);
 
-  const unsubscribe = store.subscribe(function () {
+  const unsubscribe = store.subscribe(() => {
     expect(store.getActions()).toEqual([{type: 'LOGOUT'}]);
-    expect(Token.remove).toHaveBeenCalledTimes(1);
+    expect(Token.getToken).toHaveBeenCalled();
     unsubscribe();
     done();
   });
 
-  store.dispatch(authActions.startAuthenticate());
+  store.dispatch(authActions.startAuthenticate(jest.fn()));
 });
 
 // START AUTHENTICATE - LOGIN IF TOKEN VALID
 test('startAuthenticate if token valid - should setup auth action object with user info and call Token.set', () => {
   Token.getToken = jest.fn(() => 'validToken');
 
-  return store.dispatch(authActions.startAuthenticate()).then(() => {
-    expect(store.getActions()).toEqual([{type: 'LOGIN', user: authenticated.user}]);
-    expect(Token.set).toHaveBeenCalledTimes(1);
+  return store.dispatch(authActions.startAuthenticate(jest.fn())).then(() => {
+    expect(store.getActions()).toEqual([{
+      type: 'LOGIN',
+      user: authenticated.user
+    }]);
   })
 });
 
@@ -117,8 +120,7 @@ test('startAuthenticate if token valid - should setup auth action object with us
 test('startAuthenticate if token damaged - should setup auth action object without user info and call Token.remove', () => {
   Token.getToken = jest.fn(() => 'invalidToken');
 
-  return store.dispatch(authActions.startAuthenticate()).then(() => {
+  return store.dispatch(authActions.startAuthenticate(jest.fn())).then(() => {
     expect(store.getActions()).toEqual([{type: 'LOGOUT'}]);
-    expect(Token.remove).toHaveBeenCalledTimes(1);
   })
 });

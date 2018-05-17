@@ -1,5 +1,7 @@
 import axios from 'axios';
+
 import Token from '../modules/Token';
+import UserRegisteredState from '../modules/UserRegisteredState';
 import {showFormValidationError, hideFormValidationError} from '../actions/formValidation';
 
 /**
@@ -43,6 +45,8 @@ export const startRegister = (formData = '') => {
       .then(({data}) => {
         dispatch(login(data.user));
         dispatch(hideFormValidationError());
+
+        UserRegisteredState.setUserRegistered();
       })
       .catch((err) => {
         console.log(err);
@@ -67,11 +71,14 @@ export const startLogout = () => {
 /**
  * AUTHENTICATE action
  */
-export const startAuthenticate = () => {
+export const startAuthenticate = callback => {
   return (dispatch) => {
     const token = Token.getToken();
 
-    if (!token) return dispatch(logout());
+    if (!token) {
+      dispatch(logout());
+      return callback();
+    }
 
     const reqParams = {
       method: 'post',
@@ -86,10 +93,13 @@ export const startAuthenticate = () => {
         } else {
           dispatch(login(data.user));
         }
+
+        callback();
       })
       .catch((err) => {
         console.log(err);
         dispatch(logout());
+        callback();
       });
   }
 };

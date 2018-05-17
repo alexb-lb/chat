@@ -21,28 +21,16 @@ import configureStore from './store/configureStore';
 // Combine imported reducers
 const store = configureStore();
 
-class Main extends React.Component {
+const jsx = (
+  <Provider store={store}>
+    <AppRouter/>
+  </Provider>
+);
 
-  constructor(props){
-    super(props);
-  }
+// wait until server sends info about authentication
+ReactDom.render(<LoadingPage/>, document.getElementById('app'));
 
-  componentDidMount() {
-    // check if user is logged in on refresh
-    store.dispatch(startAuthenticate());
-  }
-
-  render() {
-    return (
-      store.getState().auth.user ? (
-        <LoadingPage/>
-      ) : (
-        <Provider store={store}>
-          <AppRouter/>
-        </Provider>
-      )
-    );
-  }
-}
-
-ReactDom.render(<Main/>, document.getElementById('app'));
+// listen when server check if user logged in
+store.dispatch(startAuthenticate(() => {
+  ReactDom.render(jsx, document.getElementById('app'))
+}));
