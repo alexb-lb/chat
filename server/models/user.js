@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true, // if no value exists, will be error
     trim: true, // trim white spaces in the start and the on of the string
-    minlength: 1, // check length
+    minlength: 3, // check length
     unique: true, // unique restriction, cannot be two same emails
     validate: {
       // built-in validate function in mongoose.js

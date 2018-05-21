@@ -1,3 +1,6 @@
+// config
+require('../config/config');
+
 // modules
 const express = require('express');
 const path = require('path');
@@ -9,15 +12,12 @@ const passport = require('passport');
 // passport strategies
 const passportStrategies = require('./middleware/passportStrategies');
 
-// config files
-const config = require('../config');
-
 // controllers
 const authController = require('./controllers/auth_controller');
 
 // connect to the database and load models
 const db = require('./db');
-db.connect(config.dbUri);
+db.connect(process.env.MONGODB_URI);
 
 // variables
 const app = express();
@@ -44,20 +44,16 @@ app.post('/login', authController.login);
 app.post('/register', authController.register);
 app.post('/auth', authController.authenticate);
 
-/**
- * Send index.html file
- * check if user has auth token in cookie
- * if user hasn't token (new user for example), send cookie "user = false"
- * or send user info in cookie as "user = json'ed user params"
- */
 app.get('*', (req, res) => {
   res.sendFile(path.join(publicPath, 'app.html'));
 });
 
 // Set Port, hosting services will look for process.env.PORT
-app.set('port', (process.env.PORT || 3000));
+app.set('port', (process.env.PORT));
 
 // start the server
 app.listen(app.get('port'), () => {
   console.log(`Server is running on port ${app.get('port')}`);
 });
+
+module.exports = {app};

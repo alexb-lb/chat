@@ -4,7 +4,6 @@ const validator = require('validator');
 const moment = require('moment');
 
 const User = require('../models/user');
-const config = require('../../config');
 
 /**
  * Set user info for response to client
@@ -22,7 +21,7 @@ const setUserInfo = ({_id, name}) => {
  */
 const genToken = ({_id, name}) => {
   const exp = moment().utc().add({days: 2}).unix();
-  return 'Bearer ' + jwt.sign({_id, name, exp}, config.jwtSecret);
+  return 'Bearer ' + jwt.sign({_id, name, exp}, process.env.JWT_SECRET);
 };
 
 /**
@@ -136,7 +135,7 @@ module.exports = {
    * @param res
    *   set cookie "user" with generated token if all is ok,
    *   like {_id, name, token}
-   * @returns res with status 200 ot 404
+   * @returns res with status 200 or 404
    */
   login: async (req, res) => {
     try {
