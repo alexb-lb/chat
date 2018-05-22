@@ -24,6 +24,7 @@ const genToken = ({_id, name}) => {
   return 'Bearer ' + jwt.sign({_id, name, exp}, process.env.JWT_SECRET);
 };
 
+
 /**
  * Validate the register form
  * @param {object} payload - the HTTP body message
@@ -95,7 +96,7 @@ const validateLoginForm = (payload) => {
   return validationResult;
 };
 
-module.exports = {
+const AuthController = {
 
   /**
    * Validate user token user first request to server
@@ -116,7 +117,6 @@ module.exports = {
           if (info.name === "TokenExpiredError") {
             return res.status(401).json({success: false, message: 'Token has expired'});
           } else {
-            console.log('Token damaged');
             return res.status(401).json({success: false, message: 'Token damaged'});
           }
         }
@@ -193,3 +193,5 @@ module.exports = {
       });
   }
 };
+
+module.exports = {AuthController, genToken};

@@ -13,7 +13,7 @@ const passport = require('passport');
 const passportStrategies = require('./middleware/passportStrategies');
 
 // controllers
-const authController = require('./controllers/auth_controller');
+const {AuthController} = require('./controllers/auth_controller');
 
 // connect to the database and load models
 const db = require('./db');
@@ -40,9 +40,9 @@ passport.use("jwt", passportStrategies.jwtStrategy());
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
 
-app.post('/login', authController.login);
-app.post('/register', authController.register);
-app.post('/auth', authController.authenticate);
+app.post('/login', AuthController.login);
+app.post('/register', AuthController.register);
+app.post('/auth', AuthController.authenticate);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(publicPath, 'app.html'));

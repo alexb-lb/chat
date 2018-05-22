@@ -8,6 +8,7 @@ const {ObjectId} = require('mongodb');
 const {app} = require('../server');
 const {User} = require('./../models/user');
 const {users, populateUsers} = require('./seed/seed.js');
+const {genToken} = require('./../controllers/auth_controller');
 
 
 beforeEach(populateUsers);
@@ -25,7 +26,7 @@ describe('GET *', () => {
 });
 
 describe('POST /login', () => {
-  it('should login user and return user info object with token', (done) => {
+  it('should login user and return user info object with token', done => {
     request(app)
       .post('/login')
       .send({email: users[1].email, password: users[1].password})
@@ -40,7 +41,7 @@ describe('POST /login', () => {
       .end(done)
   });
 
-  it('should reject invalid login', (done) => {
+  it('should reject invalid login', done => {
     request(app)
       .post('/login')
       .send({email: users[1].email, password: users[1].password + '1'})
@@ -58,7 +59,7 @@ describe('POST /login', () => {
 });
 
 describe('POST /register', () => {
-  it('should register user and return user info object with token', (done) => {
+  it('should register user and return user info object with token', done => {
     request(app)
       .post('/register')
       .send(users[2])
@@ -73,7 +74,7 @@ describe('POST /register', () => {
       .end(done)
   });
 
-  it('should return validation errors if request invalid', (done) => {
+  it('should return validation errors if request invalid', done => {
     request(app)
       .post('/register')
       .send({email: 'trulala', password: '123456', name: 'Lolobot'})
@@ -88,7 +89,7 @@ describe('POST /register', () => {
       .end(done)
   });
 
-  it('should not create a user if email in use', (done) => {
+  it('should not create a user if email in use', done => {
     request(app)
       .post('/register')
       .send(users[0])
@@ -99,6 +100,36 @@ describe('POST /register', () => {
           message: 'This email is already taken',
           errorInElement: 'email'
         });
+      })
+      .end(done)
+  });
+});
+
+describe('POST /auth', () => {
+  it('should check token and return user info object with token', done => {
+    const validToken = genToken(users[0]);
+    request(app)
+      .post('/auth')
+      .set('Authorization', validToken)
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .expect(res => {
+        assert(res.body.success).toBe(true);
+        assert(res.body.user._id).toBe(users[0]._id.toString());
+        assert(res.body.user.name).toBe(users[0].name);
+        assert(typeof res.body.user.token).toBe('string');
+      })
+      .end(done)
+  });
+
+  it('should check invalid token and return error object', done => {
+    request(app)
+      .post('/auth')
+      .set('Authorization', 'sdfJLKLHJKn2nsdfn239cn')
+      .expect(401)
+      .expect('Content-Type', /json/)
+      .expect(res => {
+        assert(res.body).toEqual({success: false, message: 'Token damaged'});
       })
       .end(done)
   });
