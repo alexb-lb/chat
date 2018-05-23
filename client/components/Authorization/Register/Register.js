@@ -1,13 +1,11 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 
 const Register = ({onChange, onSubmit, user, formValidation}) => (
   <form method="post" className="form form-register" onSubmit={onSubmit}>
-    <h1>Sign up!</h1>
     {
-        !formValidation.success
-        &&
-        <p className="errorMessage">{formValidation.message}</p>
+      !formValidation.success
+      &&
+      <p className="errorMessage">{formValidation.message}</p>
     }
     <input
       onChange={onChange}
@@ -48,16 +46,11 @@ const Register = ({onChange, onSubmit, user, formValidation}) => (
       autoCorrect="off"
     />
 
-    <button
-      type="submit"
-      className="btn fullwidth spinner_button"
-      id="signup_button"
-      tabIndex="4"
-    >
-      Sign up
-    </button>
+    <button type="submit">Sign up</button>
+
+    <a href="/login" className="redirect-link">Already registered? Sign in</a>
+
   </form>
 );
-
 
 export default Register;

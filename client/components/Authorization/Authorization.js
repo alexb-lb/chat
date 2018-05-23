@@ -7,8 +7,9 @@ import {startLogin} from '../../actions/auth';
 import {startRegister} from '../../actions/auth';
 
 import Logo from "../../components/Logo/Logo";
-import Register from "./LocalAuthorization/Register/Register";
-import Login from "./LocalAuthorization/Login/Login";
+import SocialAuthorization from "./SocialAuthorization/SocialAuthorization";
+import Register from "./Register/Register";
+import Login from "./Login/Login";
 
 class Authorization extends React.Component {
   constructor(props) {
@@ -65,8 +66,14 @@ class Authorization extends React.Component {
     return (
       <main className="page-authorization">
         <Logo/>
-
         <div className="auth-container">
+
+          <h1>{this.props.match.path === '/register' ? 'Sign up!' : 'Login'}</h1>
+
+          <SocialAuthorization/>
+
+          <p className="separator"><span>or</span></p>
+
           {
             this.props.match.path === '/register' ?
               <Register

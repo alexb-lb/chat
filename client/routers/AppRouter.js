@@ -9,8 +9,6 @@ import PublicRoute from './PublicRoute';
 // compontents
 import Dating from '../components/Dating/Dating';
 import Authorization from '../components/Authorization/Authorization';
-import Login from '../components/Authorization/LocalAuthorization/Login/Login';
-import Register from '../components/Authorization/LocalAuthorization/Register/Register';
 
 // history
 export const history = createHistory();

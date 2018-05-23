@@ -4,6 +4,12 @@ import Token from '../modules/Token';
 import UserRegisteredState from '../modules/UserRegisteredState';
 import {showFormValidationError, hideFormValidationError} from '../actions/formValidation';
 
+const undefinedError = {
+  success: false,
+  message: 'Cannot connect to server',
+  errorInElement: false
+};
+
 /**
  * LOGIN
  * @param user - object
@@ -27,8 +33,12 @@ export const startLogin = (formData = '') => {
         dispatch(login(data.user));
         dispatch(hideFormValidationError());
       })
-      .catch((err) => {
-        dispatch(showFormValidationError(err.response.data));
+      .catch(err => {
+        let errorObj = undefinedError;
+        if(err.response.data.message){
+          errorObj = err.response.data
+        }
+        dispatch(showFormValidationError(errorObj));
       });
   };
 };
@@ -49,8 +59,11 @@ export const startRegister = (formData = '') => {
         UserRegisteredState.setUserRegistered();
       })
       .catch((err) => {
-        console.log(err);
-        dispatch(showFormValidationError(err.response.data));
+        let errorObj = undefinedError;
+        if(err.response.data.message){
+          errorObj = err.response.data
+        }
+        dispatch(showFormValidationError(errorObj));
       });
   };
 };
@@ -66,7 +79,6 @@ export const logout = () => {
 export const startLogout = () => {
   return (dispatch) => dispatch(logout())
 };
-
 
 /**
  * AUTHENTICATE action

@@ -1,10 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { startLogin } from "../../../../actions/auth";
 
 export const Login = ({onChange, onSubmit, user, formValidation}) => (
   <form method="post" className="form form-register" onSubmit={onSubmit}>
-    <h1>Login</h1>
     {
       !formValidation.success
       &&
@@ -36,21 +33,11 @@ export const Login = ({onChange, onSubmit, user, formValidation}) => (
       autoCorrect="off"
     />
 
-    <button
-      type="submit"
-      className="btn fullwidth spinner_button"
-      id="signup_button"
-      tabIndex="4"
-    >
-      Login
-    </button>
+    <button type="submit">Login</button>
+
+    <a href="/register" className="redirect-link">Not a member? Sign up</a>
+
   </form>
 );
 
 export default Login;
-//
-// const mapDispatchToProps = (dispatch) => ({
-//   startLogin: () => dispatch(startLogin())
-// });
-//
-// export default connect(undefined, mapDispatchToProps)(LoginPage);
