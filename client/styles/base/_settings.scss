@@ -1,4 +1,4 @@
-// COLORS
+/** COLORS **/
 // text
 $white: #fff;
 
@@ -9,18 +9,28 @@ $dark-grey: #333;
 $red: #FF1939;
 $blue: #286ebb;
 
+// social buttons
+$google-color: #b5301f;
+$facebook-color: #29487d;
+$vkontakte-color: #4a76a8;
 
-// form
+
+/** FORM **/
 $form-container-border-color: #d8dadb;
 $input-border-color: #ddd;
+
+
+/** RADIUS **/
 $border-radius: 0.5rem;
 
-// font size
+
+/** FONT SIZES **/
 $font-s-size: 1.4rem;
 $font-m-size: 1.6rem;
 $font-l-size: 3.6rem;
 
-// Spacing
+
+/** SPACINGS **/
 $gap-s-size: 1rem;
 $gap-m-size: 1.5rem;
 $gap-l-size: 2rem;

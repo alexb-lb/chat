@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 
 const Register = ({onChange, onSubmit, user, formValidation}) => (
   <form method="post" className="form form-register" onSubmit={onSubmit}>
@@ -48,7 +49,7 @@ const Register = ({onChange, onSubmit, user, formValidation}) => (
 
     <button type="submit">Sign up</button>
 
-    <a href="/login" className="redirect-link">Already registered? Sign in</a>
+    <Link className="redirect-link" to='/login'>Already registered? Sign in</Link>
 
   </form>
 );
