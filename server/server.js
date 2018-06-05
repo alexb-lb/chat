@@ -7,9 +7,9 @@ const path = require('path');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const passport = require('passport');
 
-// passport strategies
+// passport
+const passport = require('passport');
 const passportStrategies = require('./middleware/passportStrategies');
 
 // controllers
@@ -35,14 +35,20 @@ app.use(cookieParser());
 // passport init
 app.use(passport.initialize());
 passport.use("jwt", passportStrategies.jwtStrategy());
-
+passport.use("facebook", passportStrategies.facebookStrategy());
 
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
 
+// local authentication
 app.post('/login', AuthController.login);
 app.post('/register', AuthController.register);
 app.post('/auth', AuthController.authenticate);
+
+// authentication via social networks
+app.get('/auth/facebook', AuthController.authenticateFacebookRequest);
+app.get('/auth/facebook/callback', AuthController.authenticateFacebookResponse);
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(publicPath, 'app.html'));

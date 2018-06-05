@@ -4,9 +4,9 @@ import {FacebookIcon, GooglePlusIcon, VkontakteIcon} from '../../Svg/SvgSocial'
 const SocialAuthorization = () => (
   <div className="social">
 
-    <button className="facebook" type="button">
+    <a href="/auth/facebook" className="facebook" type="button">
       <FacebookIcon/>
-    </button>
+    </a>
 
     <button className="google" type="button">
       <GooglePlusIcon/>

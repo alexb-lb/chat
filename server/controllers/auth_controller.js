@@ -191,7 +191,27 @@ const AuthController = {
           errorInElement: false
         });
       });
-  }
+  },
+
+  /**
+   * Authentication via Facebook API
+   */
+  authenticateFacebookRequest: (req, res, next) => {
+    console.log('called authenticateFacebookRequest');
+    // const options = {scope: ['public_profile', 'email', 'user_birthday']};
+    return passport.authenticate('facebook')(req, res, next);
+  },
+
+  authenticateFacebookResponse: (req, res, next) => {
+    console.log('called authenticateFacebookResponse');
+    return passport.authenticate('facebook', { failureRedirect: '/login' },(err, user) => {
+      console.log('Err', err);
+      console.log('user', user);
+
+      // Successful authentication, redirect home.
+      res.redirect('/');
+    })(req, res, next)
+  },
 };
 
 module.exports = {AuthController, genToken};
