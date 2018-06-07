@@ -1,6 +1,7 @@
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
+const config = require('./config/config.json');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
@@ -9,7 +10,7 @@ module.exports = (environment) => {
   const CSSExtract = new ExtractTextPlugin('styles.css');
 
   return {
-    entry: ['babel-polyfill','./client/app.js'],
+    entry: ['babel-polyfill', './client/app.js'],
     output: {
       path: path.join(__dirname, 'public', 'dist'),
       filename: "bundle.js"
@@ -38,7 +39,12 @@ module.exports = (environment) => {
         }
       ]
     },
-    plugins: [CSSExtract],
+    plugins: [
+      CSSExtract,
+      new webpack.DefinePlugin({
+        'FACEBOOK_APP_ID': JSON.stringify(config.development.FACEBOOK_APP_ID)
+      })
+    ],
     devtool: isProduction ? 'source-map' : 'inline-source-map',
     devServer: {
       port: 3000,

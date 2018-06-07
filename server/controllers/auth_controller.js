@@ -205,11 +205,16 @@ const AuthController = {
   authenticateFacebookResponse: (req, res, next) => {
     console.log('called authenticateFacebookResponse');
     return passport.authenticate('facebook', { failureRedirect: '/login' },(err, user) => {
-      console.log('Err', err);
-      console.log('user', user);
+      if(err || !user){
+        return res.status(404).json({
+          success: false,
+          message: 'Cannot authorize via Facebook',
+          errorInElement: false
+        });
+      }
 
-      // Successful authentication, redirect home.
-      res.redirect('/');
+      console.log(user);
+      return res.status(200).json({success: true, user: setUserInfo(user)})
     })(req, res, next)
   },
 };

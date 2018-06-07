@@ -3,8 +3,7 @@ import {Redirect} from "react-router-dom";
 import axios from "axios";
 import {connect} from 'react-redux';
 
-import {startLogin} from '../../actions/auth';
-import {startRegister} from '../../actions/auth';
+import {startLogin, startSocialAuthenticate, startRegister} from '../../actions/auth';
 
 import Logo from "../../components/Logo/Logo";
 import SocialAuthorization from "./SocialAuthorization/SocialAuthorization";
@@ -55,6 +54,12 @@ class Authorization extends React.Component {
     this.props.startLogin(formData)
   };
 
+  processSocialAuth = (event, socNetworkName) => {
+    event.preventDefault();
+
+    this.props.startSocialAuthenticate(socNetworkName);
+  };
+
   render() {
     const {from} = this.props.location.state || {from: { pathname: "/" }};
     const {redirectToReferrer} = this.props;
@@ -70,7 +75,7 @@ class Authorization extends React.Component {
 
           <h1>{this.props.match.path === '/register' ? 'Sign up!' : 'Login'}</h1>
 
-          <SocialAuthorization/>
+          <SocialAuthorization facebookResponse={this.facebookResponse}/>
 
           <p className="separator"><span>or</span></p>
 
@@ -103,7 +108,8 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   startLogin: formData => dispatch(startLogin(formData)),
-  startRegister: formData => dispatch(startRegister(formData))
+  startRegister: formData => dispatch(startRegister(formData)),
+  startSocialAuthenticate: socNetworkName => dispatch(startSocialAuthenticate(socNetworkName))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Authorization);

@@ -35,7 +35,7 @@ export const startLogin = (formData = '') => {
       })
       .catch(err => {
         let errorObj = undefinedError;
-        if(err.response.data.message){
+        if(err.response && err.response.data && err.response.data.message){
           errorObj = err.response.data
         }
         dispatch(showFormValidationError(errorObj));
@@ -60,7 +60,7 @@ export const startRegister = (formData = '') => {
       })
       .catch((err) => {
         let errorObj = undefinedError;
-        if(err.response.data.message){
+        if(err.response && err.response.data && err.response.data.message){
           errorObj = err.response.data
         }
         dispatch(showFormValidationError(errorObj));
@@ -114,4 +114,40 @@ export const startAuthenticate = callback => {
         callback();
       });
   }
+};
+
+/**
+ * AUTHENTICATE via social networks
+ */
+export const startSocialAuthenticate = (socNetworkName) => {
+  return (dispatch, getState) => {
+    let authUrl = '';
+
+    switch (socNetworkName){
+      case 'facebook':
+        authUrl = '/auth/facebook';
+        break;
+      case 'google':
+        authUrl = '/auth/google';
+        break;
+      case 'vkontakte':
+        authUrl = '/auth/vkontakte';
+        break;
+    }
+
+    return axios(authUrl)
+      .then(({data}) => {
+        dispatch(login(data.user));
+        dispatch(hideFormValidationError());
+
+        UserRegisteredState.setUserRegistered();
+      })
+      .catch(err => {
+        let errorObj = undefinedError;
+        if(err.response && err.response.data && err.response.data.message){
+          errorObj = err.response.data
+        }
+        dispatch(showFormValidationError(errorObj));
+      });
+  };
 };

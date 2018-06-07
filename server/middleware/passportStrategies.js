@@ -31,7 +31,11 @@ module.exports = {
         callbackURL: process.env.DOMAIN + '/auth/facebook/callback',
         // profileFields: ['id', 'first_name', 'last_name', 'link', 'gender', 'picture', 'verified', 'email', 'birthday']
       },
-      function(accessToken, refreshToken, profile, done) {
+      function (accessToken, refreshToken, profile, done) {
+        console.log(profile);
+        // User.findOrCreate({ facebookId: profile.id }, (err, user) => {
+        //   return cb(err, user);
+        // });
         return done(null, profile);
       }
     )
