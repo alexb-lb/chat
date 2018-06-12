@@ -195,6 +195,13 @@ const AuthController = {
 
   /**
    * Authentication via Facebook API
+   * Extract access_token from Authorization Header ('Bearer access_token')
+   *
+   * React can't get user's FB token without redirect to FB page, this breaks single-page idea
+   * So I receive FB access_token form frontend via facebook button component (Facebook Login API)
+   * I decided to use 'passport-facebook-token' module instead of 'passport-facebook' because of needs
+   * to handle token from frontend. 'passport-facebook' can't handle extracted access_token
+   * Tutorial: https://medium.com/@alexanderleon/implement-social-authentication-with-react-restful-api-9b44f4714fa
    */
   authenticateFacebookRequest: (req, res, next) => {
     return passport.authenticate('facebook-token', {session: false}, (err, user, arg3) => {
