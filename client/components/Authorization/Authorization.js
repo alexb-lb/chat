@@ -1,6 +1,5 @@
 import React from "react";
 import {Redirect} from "react-router-dom";
-import axios from "axios";
 import {connect} from 'react-redux';
 
 import {startLogin, startSocialAuthenticate, startRegister} from '../../actions/auth';
@@ -75,7 +74,7 @@ class Authorization extends React.Component {
 
           <h1>{this.props.match.path === '/register' ? 'Sign up!' : 'Login'}</h1>
 
-          <SocialAuthorization facebookResponse={this.facebookResponse}/>
+          <SocialAuthorization onClick={this.processSocialAuth}/>
 
           <p className="separator"><span>or</span></p>
 

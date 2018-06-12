@@ -6,8 +6,8 @@ const moment = require('moment');
 // strategies
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const FacebookStrategy = require('passport-facebook').Strategy;
-const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const FacebookTokenStrategy = require('passport-facebook-token');
+const GoogleTokenStrategy = require('passport-google-token').Strategy;
 
 const User = require('../models/user');
 
@@ -25,14 +25,12 @@ module.exports = {
   },
 
   facebookStrategy: () => {
-    return new FacebookStrategy({
+    return new FacebookTokenStrategy({
         clientID: 240411823374286,
         clientSecret: 'ef06ac395eb99de36191b96f44b45fdf',
-        callbackURL: process.env.DOMAIN + '/auth/facebook/callback',
+        // callbackURL: process.env.DOMAIN + '/auth/facebook/callback',
         // profileFields: ['id', 'first_name', 'last_name', 'link', 'gender', 'picture', 'verified', 'email', 'birthday']
-      },
-      function (accessToken, refreshToken, profile, done) {
-        console.log(profile);
+      }, (accessToken, refreshToken, profile, done) => {
         // User.findOrCreate({ facebookId: profile.id }, (err, user) => {
         //   return cb(err, user);
         // });

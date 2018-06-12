@@ -3,10 +3,21 @@ require('../config/config');
 
 // modules
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const path = require('path');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+
+// CORS settings
+const cors = require('cors');
+const corsOptions = {
+  origin: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true
+};
 
 // passport
 const passport = require('passport');
@@ -23,19 +34,22 @@ db.connect(process.env.MONGODB_URI);
 const app = express();
 const publicPath = path.join(__dirname, '..', 'public');
 
-// secure headers
+// dev logging
+app.use(logger('dev'));
+
+// secure headers and cross-origin policy
 app.use(helmet());
+app.use(cors(corsOptions));
 
 // tell the app to parse HTTP body messages
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-
 app.use(cookieParser());
 
 // passport init
 app.use(passport.initialize());
 passport.use("jwt", passportStrategies.jwtStrategy());
-passport.use("facebook", passportStrategies.facebookStrategy());
+passport.use("facebook-token", passportStrategies.facebookStrategy());
 
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
@@ -46,8 +60,7 @@ app.post('/register', AuthController.register);
 app.post('/auth', AuthController.authenticate);
 
 // authentication via social networks
-app.get('/auth/facebook', AuthController.authenticateFacebookRequest);
-app.get('/auth/facebook/callback', AuthController.authenticateFacebookResponse);
+app.post('/auth/facebook', AuthController.authenticateFacebookRequest);
 
 
 app.get('*', (req, res) => {
@@ -57,9 +70,17 @@ app.get('*', (req, res) => {
 // Set Port, hosting services will look for process.env.PORT
 app.set('port', (process.env.PORT));
 
-// start the server
-app.listen(app.get('port'), () => {
+const sslOptions = {
+  key: fs.readFileSync('server/ssl/localhost.key'),
+  cert: fs.readFileSync('server/ssl/localhost.crt')
+};
+const httpsServer = https.createServer(sslOptions, app);
+const server = httpsServer.listen(app.get('port'), (req, res) => {
   console.log(`Server is running on port ${app.get('port')}`);
 });
+
+// app.listen(app.get('port'), () => {
+//   console.log(`Server is running on port ${app.get('port')}`);
+// });
 
 module.exports = {app};

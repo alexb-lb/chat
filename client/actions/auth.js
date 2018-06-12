@@ -35,7 +35,7 @@ export const startLogin = (formData = '') => {
       })
       .catch(err => {
         let errorObj = undefinedError;
-        if(err.response && err.response.data && err.response.data.message){
+        if (err.response && err.response.data && err.response.data.message) {
           errorObj = err.response.data
         }
         dispatch(showFormValidationError(errorObj));
@@ -60,7 +60,7 @@ export const startRegister = (formData = '') => {
       })
       .catch((err) => {
         let errorObj = undefinedError;
-        if(err.response && err.response.data && err.response.data.message){
+        if (err.response && err.response.data && err.response.data.message) {
           errorObj = err.response.data
         }
         dispatch(showFormValidationError(errorObj));
@@ -123,7 +123,7 @@ export const startSocialAuthenticate = (socNetworkName) => {
   return (dispatch, getState) => {
     let authUrl = '';
 
-    switch (socNetworkName){
+    switch (socNetworkName) {
       case 'facebook':
         authUrl = '/auth/facebook';
         break;
@@ -135,7 +135,13 @@ export const startSocialAuthenticate = (socNetworkName) => {
         break;
     }
 
-    return axios(authUrl)
+    const reqParams = {
+      method: 'post',
+      url: authUrl,
+      headers: {'Authorization': token}
+    };
+
+    return axios(reqParams)
       .then(({data}) => {
         dispatch(login(data.user));
         dispatch(hideFormValidationError());
@@ -144,7 +150,7 @@ export const startSocialAuthenticate = (socNetworkName) => {
       })
       .catch(err => {
         let errorObj = undefinedError;
-        if(err.response && err.response.data && err.response.data.message){
+        if (err.response && err.response.data && err.response.data.message) {
           errorObj = err.response.data
         }
         dispatch(showFormValidationError(errorObj));

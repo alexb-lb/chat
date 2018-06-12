@@ -197,25 +197,9 @@ const AuthController = {
    * Authentication via Facebook API
    */
   authenticateFacebookRequest: (req, res, next) => {
-    console.log('called authenticateFacebookRequest');
-    // const options = {scope: ['public_profile', 'email', 'user_birthday']};
-    return passport.authenticate('facebook')(req, res, next);
-  },
-
-  authenticateFacebookResponse: (req, res, next) => {
-    console.log('called authenticateFacebookResponse');
-    return passport.authenticate('facebook', { failureRedirect: '/login' },(err, user) => {
-      if(err || !user){
-        return res.status(404).json({
-          success: false,
-          message: 'Cannot authorize via Facebook',
-          errorInElement: false
-        });
-      }
-
-      console.log(user);
-      return res.status(200).json({success: true, user: setUserInfo(user)})
-    })(req, res, next)
+    return passport.authenticate('facebook-token', {session: false}, (err, user, arg3) => {
+      console.log('user', user);
+    })(req, res, next);
   },
 };
 
