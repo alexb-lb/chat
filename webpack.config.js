@@ -42,7 +42,8 @@ module.exports = (environment) => {
     plugins: [
       CSSExtract,
       new webpack.DefinePlugin({
-        'FACEBOOK_APP_ID': JSON.stringify(config.development.FACEBOOK_APP_ID)
+        'FACEBOOK_APP_ID': JSON.stringify(config.development.FACEBOOK_APP_ID),
+        'GOOGLE_CLIENT_ID': JSON.stringify(config.development.GOOGLE_CLIENT_ID),
       })
     ],
     devtool: isProduction ? 'source-map' : 'inline-source-map',
