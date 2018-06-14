@@ -3,6 +3,7 @@ import axios from 'axios';
 
 import FacebookLogin from 'react-facebook-login';
 import GoogleLogin from 'react-google-login';
+import VK, {Auth, Widgets} from 'react-vk';
 
 import {FacebookIcon, GooglePlusIcon, VkontakteIcon} from '../../Svg/SvgSocial'
 
@@ -11,30 +12,59 @@ class SocialAuthorization extends React.Component {
     super();
   }
 
-  onFailure = (error) => {
+  onFailure = error => {
     console.log(error);
   };
 
-  googleResponse = (res) => {
-    console.log(res);
-  };
-
-  facebookResponse = (res) => {
+  facebookResponse = res => {
     const reqParams = {
       method: 'POST',
-      url: '/auth/facebook',
-      headers: {'Authorization': 'Bearer ' + res.accessToken},
+      url: '/api/v1.0/auth/facebook',
+      headers: {'access_token': res.accessToken},
     };
 
     axios(reqParams).then(r => {
       console.log(r);
-      // const token = r.headers.get('x-auth-token');
-      // r.json().then(user => {
-      //   if (token) {
-      //     this.setState({isAuthenticated: true, user, token})
-      //   }
-      // });
     })
+  };
+
+  googleResponse = res => {
+    const reqParams = {
+      method: 'POST',
+      url: '/api/v1.0/auth/google',
+      headers: {'access_token':  res.accessToken}
+    };
+
+    axios(reqParams).then(r => {
+      console.log(r);
+    })
+  };
+
+
+  /**
+   * Vkontakte API will be available after component mounted as this.vkApi
+   * @param api = VK API initialized
+   * @returns {*}
+   */
+  vkApi = api => {
+    this.vkApi = api;
+  };
+
+  startVkontakteLogin = () => {
+    this.vkApi.Auth.login(res => {
+      const reqParams = {
+        method: 'POST',
+        url: '/api/v1.0/auth/vkontakte',
+        headers: {'Authorization': 'Bearer ' + res.session.sig},
+        data: {
+          access_token: res.session.sig
+        }
+      };
+
+      axios(reqParams).then(r => {
+        console.log(r);
+      })
+    });
   };
 
   render() {
@@ -59,6 +89,12 @@ class SocialAuthorization extends React.Component {
           className="google"
           buttonText={<GooglePlusIcon/>}
         />
+
+        <VK apiId={"" + VKONTAKTE_CLIENT_ID} onApiAvailable={this.vkApi}>
+          <button onClick={this.startVkontakteLogin} className="vkontakte" type="button">
+            <VkontakteIcon/>
+          </button>
+        </VK>
       </div>
     )
   }

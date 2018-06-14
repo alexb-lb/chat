@@ -203,9 +203,24 @@ const AuthController = {
    * to handle token from frontend. 'passport-facebook' can't handle extracted access_token
    * Tutorial: https://medium.com/@alexanderleon/implement-social-authentication-with-react-restful-api-9b44f4714fa
    */
-  authenticateFacebookRequest: (req, res, next) => {
-    return passport.authenticate('facebook-token', {session: false}, (err, user, arg3) => {
-      console.log('user', user);
+  authenticateFacebook: (req, res, next) => {
+    return passport.authenticate('facebook-token', {session: false}, (err, user) => {
+      console.log('Facebook user', user);
+    })(req, res, next);
+  },
+
+  authenticateGoogle: (req, res, next) => {
+    return passport.authenticate('google-token', {session: false}, (err, user) => {
+      console.log('Google user', user);
+    })(req, res, next);
+  },
+
+  authenticateVkontakte: (req, res, next) => {
+    console.log(req.headers);
+    console.log(req.body);
+    return passport.authenticate('vkontakte-token', {session: false}, (err, user) => {
+      console.log('Vkontakte err', err);
+      console.log('Vkontakte user', user);
     })(req, res, next);
   },
 };

@@ -9,7 +9,7 @@ const mock = new MockAdapter(axios);
 
 // Mock any GET request to /users
 // arguments for reply are (status, data, headers)
-mock.onPost('/login').reply(reqData => {
+mock.onPost('/api/v1.0/login').reply(reqData => {
   return new Promise((res, rej) => {
     if(!reqData.data){
       return rej({response: {data: errorState}})
@@ -29,7 +29,7 @@ mock.onPost('/register').reply(reqData => {
   });
 });
 
-mock.onPost('/auth').reply(reqData => {
+mock.onPost('/api/v1.0/auth').reply(reqData => {
   return new Promise((res, rej) => {
     if(reqData.headers.Authorization !== 'validToken'){
       return rej({response: {data: {success: false, message: 'Token damaged'}}})

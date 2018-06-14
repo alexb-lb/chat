@@ -24,7 +24,7 @@ export const startLogin = (formData = '') => {
   return (dispatch, getState) => {
     const params = {
       method: 'post',
-      url: '/login',
+      url: '/api/v1.0/login',
       data: formData
     };
 
@@ -94,7 +94,7 @@ export const startAuthenticate = callback => {
 
     const reqParams = {
       method: 'post',
-      url: '/auth',
+      url: '/api/v1.0/auth',
       headers: {'Authorization': token}
     };
 
@@ -125,13 +125,13 @@ export const startSocialAuthenticate = (socNetworkName) => {
 
     switch (socNetworkName) {
       case 'facebook':
-        authUrl = '/auth/facebook';
+        authUrl = '/api/v1.0/auth/facebook';
         break;
       case 'google':
-        authUrl = '/auth/google';
+        authUrl = '/api/v1.0/auth/google';
         break;
       case 'vkontakte':
-        authUrl = '/auth/vkontakte';
+        authUrl = '/api/v1.0/auth/vkontakte';
         break;
     }
 

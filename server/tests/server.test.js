@@ -25,10 +25,10 @@ describe('GET *', () => {
   })
 });
 
-describe('POST /login', () => {
+describe('POST /api/v1.0/login', () => {
   it('should login user and return user info object with token', done => {
     request(app)
-      .post('/login')
+      .post('/api/v1.0/login')
       .send({email: users[1].email, password: users[1].password})
       .expect(200)
       .expect('Content-Type', /json/)
@@ -43,7 +43,7 @@ describe('POST /login', () => {
 
   it('should reject invalid login', done => {
     request(app)
-      .post('/login')
+      .post('/api/v1.0/login')
       .send({email: users[1].email, password: users[1].password + '1'})
       .expect(404)
       .expect('Content-Type', /json/)
@@ -58,10 +58,10 @@ describe('POST /login', () => {
   })
 });
 
-describe('POST /register', () => {
+describe('POST /api/v1.0/register', () => {
   it('should register user and return user info object with token', done => {
     request(app)
-      .post('/register')
+      .post('/api/v1.0/register')
       .send(users[2])
       .expect(200)
       .expect('Content-Type', /json/)
@@ -76,7 +76,7 @@ describe('POST /register', () => {
 
   it('should return validation errors if request invalid', done => {
     request(app)
-      .post('/register')
+      .post('/api/v1.0/register')
       .send({email: 'trulala', password: '123456', name: 'Lolobot'})
       .expect(400)
       .expect(res => {
@@ -91,7 +91,7 @@ describe('POST /register', () => {
 
   it('should not create a user if email in use', done => {
     request(app)
-      .post('/register')
+      .post('/api/v1.0/register')
       .send(users[0])
       .expect(409)
       .expect(res => {
@@ -105,11 +105,11 @@ describe('POST /register', () => {
   });
 });
 
-describe('POST /auth', () => {
+describe('POST /api/v1.0/auth', () => {
   it('should check token and return user info object with token', done => {
     const validToken = genToken(users[0]);
     request(app)
-      .post('/auth')
+      .post('/api/v1.0/auth')
       .set('Authorization', validToken)
       .expect(200)
       .expect('Content-Type', /json/)
@@ -124,7 +124,7 @@ describe('POST /auth', () => {
 
   it('should check invalid token and return error object', done => {
     request(app)
-      .post('/auth')
+      .post('/api/v1.0/auth')
       .set('Authorization', 'sdfJLKLHJKn2nsdfn239cn')
       .expect(401)
       .expect('Content-Type', /json/)

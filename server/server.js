@@ -50,17 +50,21 @@ app.use(cookieParser());
 app.use(passport.initialize());
 passport.use("jwt", passportStrategies.jwtStrategy());
 passport.use("facebook-token", passportStrategies.facebookStrategy());
+passport.use("google-token", passportStrategies.googleStrategy());
+passport.use("vkontakte-token", passportStrategies.vkontakteStrategy());
 
 // tell the app to look for static files in these directories
 app.use(express.static(publicPath));
 
 // local authentication
-app.post('/login', AuthController.login);
-app.post('/register', AuthController.register);
-app.post('/auth', AuthController.authenticate);
+app.post('/api/v1.0/login', AuthController.login);
+app.post('/api/v1.0/register', AuthController.register);
+app.post('/api/v1.0/auth', AuthController.authenticate);
 
 // authentication via social networks
-app.post('/auth/facebook', AuthController.authenticateFacebookRequest);
+app.post('/api/v1.0/auth/facebook', AuthController.authenticateFacebook);
+app.post('/api/v1.0/auth/google', AuthController.authenticateGoogle);
+app.post('/api/v1.0/auth/vkontakte', AuthController.authenticateVkontakte);
 
 
 app.get('*', (req, res) => {
@@ -70,17 +74,17 @@ app.get('*', (req, res) => {
 // Set Port, hosting services will look for process.env.PORT
 app.set('port', (process.env.PORT));
 
-const sslOptions = {
-  key: fs.readFileSync('server/ssl/localhost.key'),
-  cert: fs.readFileSync('server/ssl/localhost.crt')
-};
-const httpsServer = https.createServer(sslOptions, app);
-const server = httpsServer.listen(app.get('port'), (req, res) => {
-  console.log(`Server is running on port ${app.get('port')}`);
-});
-
-// app.listen(app.get('port'), () => {
+// const sslOptions = {
+//   key: fs.readFileSync('server/ssl/localhost.key'),
+//   cert: fs.readFileSync('server/ssl/localhost.crt')
+// };
+// const httpsServer = https.createServer(sslOptions, app);
+// const server = httpsServer.listen(app.get('port'), (req, res) => {
 //   console.log(`Server is running on port ${app.get('port')}`);
 // });
+
+app.listen(app.get('port'), () => {
+  console.log(`Server is running on port ${app.get('port')}`);
+});
 
 module.exports = {app};

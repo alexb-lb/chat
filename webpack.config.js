@@ -44,11 +44,12 @@ module.exports = (environment) => {
       new webpack.DefinePlugin({
         'FACEBOOK_APP_ID': JSON.stringify(config.development.FACEBOOK_APP_ID),
         'GOOGLE_CLIENT_ID': JSON.stringify(config.development.GOOGLE_CLIENT_ID),
+        'VKONTAKTE_CLIENT_ID': JSON.stringify(config.development.VKONTAKTE_CLIENT_ID),
       })
     ],
     devtool: isProduction ? 'source-map' : 'inline-source-map',
     devServer: {
-      port: 3000,
+      port: 80,
       contentBase: path.join(__dirname, 'public'),
       historyApiFallback: {index: 'app.html'},
       publicPath: '/dist/'
