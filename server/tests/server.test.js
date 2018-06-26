@@ -3,134 +3,190 @@ const fs = require('fs');
 const assert = require('expect');
 const request = require('supertest');
 
-const {ObjectId} = require('mongodb');
-
 const {app} = require('../server');
-const {User} = require('./../models/user');
+const User = require('./../models/user');
 const {users, populateUsers} = require('./seed/seed.js');
-const {genToken} = require('./../controllers/auth_controller');
+const {AuthController, genToken} = require('./../controllers/auth_controller');
 
+const responseMock = require('./mocks/responseMock');
 
 beforeEach(populateUsers);
 
-describe('GET *', () => {
-  it('should return index page with app html', done => {
+describe('GET app.html', () => {
+  it('should return index page with app html', async () => {
     const html = fs.readFileSync('./public/app.html', 'utf8');
-
-    request(app)
-      .get('/')
-      .expect(200)
-      .expect(res => assert(res.text).toBe(html))
-      .end(done);
+    const res = await request(app).get('/');
+    assert(res.statusCode).toBe(200);
+    assert(res.text).toBe(html);
   })
 });
 
 describe('POST /api/v1.0/login', () => {
-  it('should login user and return user info object with token', done => {
-    request(app)
+  it('should login user and return user info object with token', async () => {
+    const res = await request(app)
       .post('/api/v1.0/login')
-      .send({email: users[1].email, password: users[1].password})
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        assert(res.body.success).toBe(true);
-        assert(res.body.user._id).toBe(users[1]._id.toString());
-        assert(res.body.user.name).toBe(users[1].name);
-        assert(typeof res.body.user.token).toBe('string');
-      })
-      .end(done)
+      .send({email: users[0].local.email, password: users[0].local.password});
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toBe(users[0]._id.toString());
+    assert(res.body.user.name).toBe(users[0].name);
+    assert(typeof res.body.user.token).toBe('string');
   });
 
-  it('should reject invalid login', done => {
-    request(app)
+  it('should reject if user not found', async () => {
+    const res = await request(app)
       .post('/api/v1.0/login')
-      .send({email: users[1].email, password: users[1].password + '1'})
-      .expect(404)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        assert(res.body).toEqual({
-          success: false,
-          message: 'Incorrect password',
-          errorInElement: 'password'
-        });
-      })
-      .end(done)
-  })
+      .send({email: 'unknown@unknown.com', password: '1234567890'});
+
+    assert(res.statusCode).toBe(404);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body).toEqual({success: false, message: 'User not found', errorInElement: false});
+  });
+
+  it('should reject if password is invalid', async () => {
+    const res = await request(app)
+      .post('/api/v1.0/login')
+      .send({email: users[0].local.email, password: users[0].local.password + '1'});
+
+    assert(res.statusCode).toBe(400);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body).toEqual({success: false, message: 'Incorrect password', errorInElement: 'password'});
+  });
 });
 
 describe('POST /api/v1.0/register', () => {
-  it('should register user and return user info object with token', done => {
-    request(app)
+  it('should return validation errors if request invalid', async () => {
+    const res = await request(app)
       .post('/api/v1.0/register')
-      .send(users[2])
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        assert(res.body.success).toBe(true);
-        assert(res.body.user._id).toBe(users[2]._id.toString());
-        assert(res.body.user.name).toBe(users[2].name);
-        assert(typeof res.body.user.token).toBe('string');
-      })
-      .end(done)
+      .send({email: 'trulala', password: '123456', name: 'Lolobot'});
+
+    assert(res.statusCode).toBe(400);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body).toEqual({
+      success: false,
+      message: 'Please provide a correct email address.',
+      errorInElement: 'email'
+    });
   });
 
-  it('should return validation errors if request invalid', done => {
-    request(app)
+  it('should not create a user if email in use', async () => {
+    const res = await request(app)
       .post('/api/v1.0/register')
-      .send({email: 'trulala', password: '123456', name: 'Lolobot'})
-      .expect(400)
-      .expect(res => {
-        assert(res.body).toEqual({
-          success: false,
-          message: 'Please provide a correct email address.',
-          errorInElement: 'email'
-        });
-      })
-      .end(done)
+      .send({email: users[0].local.email, name: users[0].name, password: users[0].local.password});
+
+    assert(res.statusCode).toBe(409);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body).toEqual({
+      success: false,
+      message: 'This email is already taken',
+      errorInElement: 'email'
+    });
   });
 
-  it('should not create a user if email in use', done => {
-    request(app)
+  it('should link together local register with account registered via social network if email the same', async () => {
+    const res = await request(app)
       .post('/api/v1.0/register')
-      .send(users[0])
-      .expect(409)
-      .expect(res => {
-        assert(res.body).toEqual({
-          success: false,
-          message: 'This email is already taken',
-          errorInElement: 'email'
-        });
-      })
-      .end(done)
+      .send({email: users[2].local.email, password: users[2].local.password, name: users[2].name});
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toBe(users[1]._id.toString());
+    assert(res.body.user.name).toBe(users[1].name);
+    assert(typeof res.body.user.token).toBe('string');
+
+    const updatedUser = await User.findOne({_id: users[1]._id});
+    assert(updatedUser.local.email).toBe(users[2].local.email);
+    assert(updatedUser.local.password.length).toBeGreaterThan(1);
+  });
+
+  it('should register user and return user info object with token', async () => {
+    const res = await request(app)
+      .post('/api/v1.0/register')
+      .send({email: users[3].local.email, password: users[3].local.password, name: users[3].name});
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toEqual(assert.any(String));
+    assert(res.body.user.name).toBe(users[3].name);
+    assert(typeof res.body.user.token).toBe('string');
   });
 });
 
 describe('POST /api/v1.0/auth', () => {
-  it('should check token and return user info object with token', done => {
+  it('should check token and return user info object with token', async () => {
     const validToken = genToken(users[0]);
-    request(app)
+
+    const res = await request(app)
       .post('/api/v1.0/auth')
-      .set('Authorization', validToken)
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        assert(res.body.success).toBe(true);
-        assert(res.body.user._id).toBe(users[0]._id.toString());
-        assert(res.body.user.name).toBe(users[0].name);
-        assert(typeof res.body.user.token).toBe('string');
-      })
-      .end(done)
+      .set('Authorization', validToken);
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toBe(users[0]._id.toString());
+    assert(res.body.user.name).toBe(users[0].name);
+    assert(typeof res.body.user.token).toBe('string');
   });
 
-  it('should check invalid token and return error object', done => {
-    request(app)
+  it('should check invalid token and return error object', async () => {
+    const res = await request(app)
       .post('/api/v1.0/auth')
-      .set('Authorization', 'sdfJLKLHJKn2nsdfn239cn')
-      .expect(401)
-      .expect('Content-Type', /json/)
-      .expect(res => {
-        assert(res.body).toEqual({success: false, message: 'Token damaged'});
-      })
-      .end(done)
+      .set('Authorization', 'qqqqqqqq');
+
+    assert(res.statusCode).toBe(401);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body).toEqual({success: false, message: 'Token damaged'});
+  });
+});
+
+describe('Auth.socialLogin (POST /api/v1.0/auth/facebook) method tests', () => {
+  it('should login user if social network id exists and return user info object', async () => {
+    const authenticatedUser = {
+      provider: 'facebook',
+      token: users[1].facebook.token,
+      id: users[1].facebook.id,
+      email: users[1].facebook.email,
+      name: users[1].name,
+      avatar: users[1].name
+    };
+
+    const res = await AuthController.socialLogin(responseMock, authenticatedUser);
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toBe(users[1]._id.toString());
+    assert(res.body.user.name).toBe(users[1].name);
+    assert(typeof res.body.user.token).toBe('string');
+  });
+
+  it('should link together social account with already registered local if email the same', async () => {
+    const res = await AuthController.socialLogin(responseMock, users[5]);
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toBe(users[0]._id.toString());
+    assert(res.body.user.name).toBe(users[0].name);
+    assert(typeof res.body.user.token).toBe('string');
+
+    const updatedUser = await User.findOne({_id: users[0]._id});
+    assert(updatedUser.facebook.email).toBe(users[5].email);
+    assert(updatedUser.facebook.id).toBe(users[5].id);
+  });
+
+  it('should register new user and return user object', async () => {
+    const res = await AuthController.socialLogin(responseMock, users[4]);
+
+    assert(res.statusCode).toBe(200);
+    assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
+    assert(res.body.success).toBe(true);
+    assert(res.body.user._id).toEqual(assert.any(String));
+    assert(res.body.user.name).toBe(users[4].name);
+    assert(typeof res.body.user.token).toBe('string');
   });
 });

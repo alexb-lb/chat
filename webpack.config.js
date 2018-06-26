@@ -49,7 +49,7 @@ module.exports = (environment) => {
     ],
     devtool: isProduction ? 'source-map' : 'inline-source-map',
     devServer: {
-      port: 80,
+      port: 3000,
       contentBase: path.join(__dirname, 'public'),
       historyApiFallback: {index: 'app.html'},
       publicPath: '/dist/'

@@ -47,7 +47,7 @@ export const startRegister = (formData = '') => {
   return (dispatch, getState) => {
     const params = {
       method: 'post',
-      url: '/register',
+      url: '/api/v1.0/register',
       data: formData
     };
 

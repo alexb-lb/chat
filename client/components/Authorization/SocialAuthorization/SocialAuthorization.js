@@ -55,10 +55,8 @@ class SocialAuthorization extends React.Component {
       const reqParams = {
         method: 'POST',
         url: '/api/v1.0/auth/vkontakte',
-        headers: {'Authorization': 'Bearer ' + res.session.sig},
-        data: {
-          access_token: res.session.sig
-        }
+        headers: {'access_token': res.session.sid},
+        data: { access_token: res.session.sid }
       };
 
       axios(reqParams).then(r => {
@@ -75,7 +73,8 @@ class SocialAuthorization extends React.Component {
         <FacebookLogin
           appId={"" + FACEBOOK_APP_ID}
           autoLoad={false}
-          fields="name,email,picture"
+          scope="public_profile, email"
+          // scope="email, user_age_range,user_birthday, user_gender, user_hometown, user_location, user_friends, user_photos"
           callback={this.facebookResponse}
           cssClass="facebook"
           icon={<FacebookIcon />}
@@ -84,6 +83,8 @@ class SocialAuthorization extends React.Component {
 
         <GoogleLogin
           clientId={"" + GOOGLE_CLIENT_ID}
+          // scope='https://www.googleapis.com/auth/plus.login, https://www.googleapis.com/auth/plus.profile.emails.read, https://www.googleapis.com/auth/user.birthday.read, https://www.googleapis.com/auth/plus.me'
+          scope="email profile openid https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/plus.profile.emails.read https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/plus.me"
           onSuccess={this.googleResponse}
           onFailure={this.onFailure}
           className="google"
