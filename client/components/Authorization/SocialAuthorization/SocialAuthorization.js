@@ -1,44 +1,25 @@
 import React from 'react';
 import axios from 'axios';
+import {connect} from 'react-redux';
 
 import FacebookLogin from 'react-facebook-login';
 import GoogleLogin from 'react-google-login';
-import VK, {Auth, Widgets} from 'react-vk';
+import VK from 'react-vk';
+
+import {startSocialAuthenticate} from '../../../actions/auth';
 
 import {FacebookIcon, GooglePlusIcon, VkontakteIcon} from '../../Svg/SvgSocial'
 
 class SocialAuthorization extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
   }
 
-  onFailure = error => {
-    console.log(error);
-  };
+  onFailure = error => console.log(error);
 
-  facebookResponse = res => {
-    const reqParams = {
-      method: 'POST',
-      url: '/api/v1.0/auth/facebook',
-      headers: {'access_token': res.accessToken},
-    };
+  facebookResponse = res => this.props.startSocialAuthenticate('facebook', res.accessToken);
 
-    axios(reqParams).then(r => {
-      console.log(r);
-    })
-  };
-
-  googleResponse = res => {
-    const reqParams = {
-      method: 'POST',
-      url: '/api/v1.0/auth/google',
-      headers: {'access_token':  res.accessToken}
-    };
-
-    axios(reqParams).then(r => {
-      console.log(r);
-    })
-  };
+  googleResponse = res => this.props.startSocialAuthenticate('google', res.accessToken);
 
 
   /**
@@ -49,21 +30,8 @@ class SocialAuthorization extends React.Component {
   vkApi = api => {
     this.vkApi = api;
   };
+  startVkontakteLogin = () => this.props.startSocialAuthenticate('vkontakte', res.session.sid);
 
-  startVkontakteLogin = () => {
-    this.vkApi.Auth.login(res => {
-      const reqParams = {
-        method: 'POST',
-        url: '/api/v1.0/auth/vkontakte',
-        headers: {'access_token': res.session.sid},
-        data: { access_token: res.session.sid }
-      };
-
-      axios(reqParams).then(r => {
-        console.log(r);
-      })
-    });
-  };
 
   render() {
 
@@ -101,4 +69,8 @@ class SocialAuthorization extends React.Component {
   }
 }
 
-export default SocialAuthorization;
+const mapDispatchToProps = (dispatch) => ({
+  startSocialAuthenticate: (socNetworkName, token) => dispatch(startSocialAuthenticate(socNetworkName, token))
+});
+
+export default connect(null, mapDispatchToProps)(SocialAuthorization);

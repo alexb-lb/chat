@@ -119,7 +119,7 @@ export const startAuthenticate = callback => {
 /**
  * AUTHENTICATE via social networks
  */
-export const startSocialAuthenticate = (socNetworkName) => {
+export const startSocialAuthenticate = (socNetworkName, token) => {
   return (dispatch, getState) => {
     let authUrl = '';
 
@@ -138,7 +138,7 @@ export const startSocialAuthenticate = (socNetworkName) => {
     const reqParams = {
       method: 'post',
       url: authUrl,
-      headers: {'Authorization': token}
+      headers: {'access_token': token}
     };
 
     return axios(reqParams)

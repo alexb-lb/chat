@@ -2,7 +2,7 @@ import React from "react";
 import {Redirect} from "react-router-dom";
 import {connect} from 'react-redux';
 
-import {startLogin, startSocialAuthenticate, startRegister} from '../../actions/auth';
+import {startLogin, startRegister} from '../../actions/auth';
 
 import Logo from "../../components/Logo/Logo";
 import SocialAuthorization from "./SocialAuthorization/SocialAuthorization";
@@ -50,13 +50,7 @@ class Authorization extends React.Component {
     const password = encodeURIComponent(this.state.user.password);
     const formData = `email=${email}&password=${password}`;
 
-    this.props.startLogin(formData)
-  };
-
-  processSocialAuth = (event, socNetworkName) => {
-    event.preventDefault();
-
-    this.props.startSocialAuthenticate(socNetworkName);
+    this.props.startLogin(formData);
   };
 
   render() {
@@ -74,7 +68,7 @@ class Authorization extends React.Component {
 
           <h1>{this.props.match.path === '/register' ? 'Sign up!' : 'Login'}</h1>
 
-          <SocialAuthorization onClick={this.processSocialAuth}/>
+          <SocialAuthorization/>
 
           <p className="separator"><span>or</span></p>
 

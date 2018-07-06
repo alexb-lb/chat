@@ -8,6 +8,7 @@ import PublicRoute from './PublicRoute';
 
 // compontents
 import Dating from '../components/Dating/Dating';
+import Profile from '../components/Profile/Profile';
 import Authorization from '../components/Authorization/Authorization';
 
 // history
@@ -19,7 +20,7 @@ const AppRouter = () => (
     <div>
       <Switch>
         <PrivateRoute path="/" component={Dating} exact={true}/>
-        <PrivateRoute path="/testprivate" component={Dating} exact={true}/>
+        <PrivateRoute path="/testprivate" component={Profile} exact={true}/>
         <PublicRoute path="/login"  component={Authorization} subComponent="login"/>
         <PublicRoute path="/register" component={Authorization} subComponent="register"/>
       </Switch>
