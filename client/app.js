@@ -35,8 +35,10 @@ const renderApp = () => {
 // wait until server sends info about authentication
 ReactDom.render(<LoadingPage/>, document.getElementById('app'));
 
-// listen when server check if user logged in
-store.dispatch(startAuthenticate(() => {
-  renderApp();
-  // ReactDom.render(jsx, document.getElementById('app'))
-}));
+/**
+ * Every time user requests the site, check if his token exist and send it to server for check
+ * Server responses object {_id, name, token}
+ * Insert this object into state.auth.user
+ * Router check if state.auth.user is not null and load private components or redirects to login\register
+ */
+store.dispatch(startAuthenticate(() => renderApp()));

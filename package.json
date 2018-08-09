@@ -9,8 +9,7 @@
     "dev-server": "webpack-dev-server",
     "test-server": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha ./server/tests/*.test.js",
     "test-client": "jest ./client/tests",
-    "start": "node ./server/server.js",
-    "heroku-postbuild": "yarn run build:prod"
+    "start": "node ./server/server.js"
   },
   "author": "Alex Bobrenko",
   "license": "ISC",
@@ -24,6 +23,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
+    "chromedriver": "^2.40.0",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.4",
@@ -51,6 +51,7 @@
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
     "sass-loader": "^6.0.6",
+    "selenium-webdriver": "^4.0.0-alpha.1",
     "style-loader": "^0.20.1",
     "supertest": "^3.1.0",
     "validator": "^9.4.0",

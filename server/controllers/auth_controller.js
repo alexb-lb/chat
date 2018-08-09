@@ -115,10 +115,10 @@ const AuthController = {
     return passport.authenticate('jwt', {session: false, failWithError: true}, (payload, info) => {
         if (!payload) {
           if (info.name === "TokenExpiredError") {
-            return res.status(401).json({success: false, message: 'Token has expired'});
+            return res.status(401).json({success: false, message: 'Token has expired', errorInElement: false});
           } else {
             console.log('Wrong token error');
-            return res.status(401).json({success: false, message: 'Token damaged'});
+            return res.status(401).json({success: false, message: 'Could not authenticate. Please contact site administration', errorInElement: false});
           }
         }
         return res.status(200).json({success: true, message: 'OK', user: setUserInfo(payload)});

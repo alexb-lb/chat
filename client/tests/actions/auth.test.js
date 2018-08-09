@@ -4,7 +4,7 @@ import thunk from 'redux-thunk';
 import * as authActions from '../../actions/auth';
 
 import {notAuthenticated, authenticated} from '../fixtures/auth';
-import {errorState, noErrorState} from '../fixtures/formValidation';
+import {errorStateEmail, noErrorState, undefinedError, errorStateTokenInvalid} from '../fixtures/formValidation';
 
 import Token from '../../modules/Token';
 jest.mock('../../modules/Token');
@@ -22,6 +22,8 @@ beforeEach(() => {
 
   Token.set.mockClear();
   Token.remove.mockClear();
+
+  UserRegisteredState.setUserRegistered.mockClear();
 });
 
 // LOGIN
@@ -64,7 +66,7 @@ test('startLogin with error form data - should setup auth action object from log
   const invalidFormData = false;
 
   return store.dispatch(authActions.startLogin(invalidFormData)).then(() => {
-    expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: errorState});
+    expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: errorStateEmail});
     expect(Token.set).not.toHaveBeenCalled();
   });
 });
@@ -85,7 +87,7 @@ test('startRegister with error form data - should setup auth action object from 
   const invalidFormData = false;
 
   return store.dispatch(authActions.startLogin(invalidFormData)).then(() => {
-    expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: errorState});
+    expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: errorStateEmail});
     expect(Token.set).not.toHaveBeenCalled();
   });
 });
@@ -110,7 +112,7 @@ test('startAuthenticate if token valid - should setup auth action object with us
 
   return store.dispatch(authActions.startAuthenticate(jest.fn())).then(() => {
     expect(store.getActions()).toEqual([{
-      type: 'LOGIN',
+      type: 'AUTHENTICATE',
       user: authenticated.user
     }]);
   })
@@ -123,4 +125,35 @@ test('startAuthenticate if token damaged - should setup auth action object witho
   return store.dispatch(authActions.startAuthenticate(jest.fn())).then(() => {
     expect(store.getActions()).toEqual([{type: 'LOGOUT'}]);
   })
+});
+
+// START SOCIAL AUTHENTICATE WITH VALID DATA
+test('startSocialAuthenticate via facebook with valid token - should setup auth action object with user info and no form validation errors', () => {
+  const socNetwork = 'facebook';
+  const validToken = 'validToken';
+
+  return store.dispatch(authActions.startSocialAuthenticate(socNetwork, validToken)).then(() => {
+    expect(store.getActions()).toContainEqual({type: 'LOGIN', user: authenticated.user});
+    expect(store.getActions()).toContainEqual({type: 'HIDE_FORM_VALIDATION_ERROR'});
+    expect(UserRegisteredState.setUserRegistered).toHaveBeenCalledTimes(1);
+  })
+});
+
+// START SOCIAL AUTHENTICATE WITH INVALID DATA
+test('startRegister with invalid token - should setup auth action object with form validation error', async () => {
+  const socNetwork = 'facebook';
+  const invalidToken = 'invalidToken';
+
+  await store.dispatch(authActions.startSocialAuthenticate(socNetwork, invalidToken));
+  expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: errorStateTokenInvalid});
+  expect(Token.set).not.toHaveBeenCalled();
+});
+
+// START SOCIAL AUTHENTICATE - MISS PARAMETER PASSING
+test('startRegister tries to launch without one of the parameters - should setup auth action object with validation error', async () => {
+  const socNetwork = undefined;
+  const validToken = 'validToken';
+
+  await store.dispatch(authActions.startSocialAuthenticate(socNetwork, validToken));
+  expect(store.getActions()[0]).toEqual({type: 'SHOW_FORM_VALIDATION_ERROR', state: undefinedError});
 });

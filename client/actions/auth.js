@@ -83,6 +83,11 @@ export const startLogout = () => {
 /**
  * AUTHENTICATE action
  */
+export const authenticate = (user) => {
+  Token.set(user.token);
+  return {type: 'AUTHENTICATE', user}
+};
+
 export const startAuthenticate = callback => {
   return (dispatch) => {
     const token = Token.getToken();
@@ -103,7 +108,7 @@ export const startAuthenticate = callback => {
         if (!data.success) {
           dispatch(logout());
         } else {
-          dispatch(login(data.user));
+          dispatch(authenticate(data.user));
         }
 
         callback();
@@ -121,6 +126,14 @@ export const startAuthenticate = callback => {
  */
 export const startSocialAuthenticate = (socNetworkName, token) => {
   return (dispatch, getState) => {
+    let errorObj = undefinedError;
+
+    if(!socNetworkName || !token){
+      dispatch(showFormValidationError(errorObj));
+      console.log('Error in aut action, startSocialAuthenticate: socNetworkName or token undefined');
+      return;
+    }
+
     let authUrl = '';
 
     switch (socNetworkName) {
@@ -149,7 +162,6 @@ export const startSocialAuthenticate = (socNetworkName, token) => {
         UserRegisteredState.setUserRegistered();
       })
       .catch(err => {
-        let errorObj = undefinedError;
         if (err.response && err.response.data && err.response.data.message) {
           errorObj = err.response.data
         }

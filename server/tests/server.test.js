@@ -139,7 +139,7 @@ describe('POST /api/v1.0/auth', () => {
 
     assert(res.statusCode).toBe(401);
     assert(res.headers['content-type']).toEqual(assert.stringContaining('json'));
-    assert(res.body).toEqual({success: false, message: 'Token damaged'});
+    assert(res.body).toEqual({success: false, message: 'Could not authenticate. Please contact site administration', errorInElement: false});
   });
 });
 
